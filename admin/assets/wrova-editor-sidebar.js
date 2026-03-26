@@ -308,7 +308,11 @@
         const [improved, setImproved] = useState(null);
 
         const { editPost }         = useDispatch('core/editor');
+        const { insertBlocks }     = useDispatch('core/block-editor');
         const getEditedPostContent = useSelect((s) => s('core/editor').getEditedPostContent);
+
+        /* 偵測是否為 Block Editor */
+        const isBlockEditor = !!(wp.blocks && wp.blocks.rawHandler && insertBlocks);
 
         async function handleImprove() {
             const content = getEditedPostContent();
@@ -343,9 +347,23 @@
         }
 
         function applyImproved() {
-            editPost({ content: improved });
+            if (isBlockEditor) {
+                /* Block Editor：把 HTML 轉成 blocks，插入文章頂部 */
+                try {
+                    const newBlocks = wp.blocks.rawHandler({ HTML: improved });
+                    insertBlocks(newBlocks, 0);
+                } catch (e) {
+                    /* rawHandler 失敗時退回 HTML block */
+                    const fallback = wp.blocks.createBlock('core/html', { content: improved });
+                    insertBlocks([fallback], 0);
+                }
+            } else {
+                /* Classic Editor：在頂部加一行分隔 + 新內容 */
+                const existing = getEditedPostContent() || '';
+                editPost({ content: improved + '\n\n<hr/>\n\n' + existing });
+            }
             setStatus('done');
-            setMessage('已套用潤稿版本，請確認後儲存。');
+            setMessage('已插入文章頂部，請確認後儲存。');
             setImproved(null);
         }
 
@@ -372,7 +390,7 @@
 
             status === 'preview' && el(PanelBody, { title: '潤稿完成', initialOpen: true },
                 el('p', { style: { fontSize: '12px', color: '#888', margin: '0 0 10px' } },
-                    '點「套用」後可在編輯器逐段確認差異。'
+                    'AI 潤稿內容將插入文章頂部，原本內容保留在下方，可自行對照後刪減。'
                 ),
                 el(Flex, { gap: 2 },
                     el(FlexItem, null,
