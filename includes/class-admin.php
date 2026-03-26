@@ -9,6 +9,7 @@ class Wrova_Admin {
     public function __construct() {
         add_action( 'admin_menu', [ $this, 'register_menu' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+        add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_sidebar' ] );
         add_action( 'admin_notices', [ $this, 'check_rank_math' ] );
     }
 
@@ -51,6 +52,29 @@ class Wrova_Admin {
             'nonce'   => wp_create_nonce( 'wp_rest' ),
             'restUrl' => rest_url( 'wrova/v1/' ),
         ] );
+    }
+
+    public function enqueue_editor_sidebar(): void {
+        wp_enqueue_script(
+            'wrova-editor-sidebar',
+            WROVA_PLUGIN_URL . 'admin/assets/wrova-editor-sidebar.js',
+            [
+                'wp-plugins',
+                'wp-edit-post',
+                'wp-element',
+                'wp-components',
+                'wp-data',
+                'wp-api-fetch',
+                'wp-i18n',
+            ],
+            WROVA_VERSION,
+            true
+        );
+        wp_add_inline_script(
+            'wrova-editor-sidebar',
+            'wp.apiFetch.use( wp.apiFetch.createNonceMiddleware( ' . wp_json_encode( wp_create_nonce( 'wp_rest' ) ) . ' ) );',
+            'before'
+        );
     }
 
     public function check_rank_math(): void {
