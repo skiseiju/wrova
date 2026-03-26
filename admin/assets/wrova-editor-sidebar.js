@@ -86,10 +86,7 @@
             return imgs;
         });
 
-        /* 同步圖片清單變動時，預設全選 */
-        useEffect(() => {
-            setSelectedImgIds(allImages.map((img) => img.id || img.url));
-        }, [allImages.length]);
+        /* 圖片清單變動時不預設勾選，由使用者手動選擇 */
 
         function toggleMood(val) {
             setSelectedMoods((prev) =>
@@ -348,23 +345,67 @@
 
         function applyImproved() {
             if (isBlockEditor) {
-                /* Block Editor：把 HTML 轉成 blocks，插入文章頂部 */
+                /* 剝掉 AI 常回傳的外層 <div> 包裹，讓 rawHandler 能正確辨識各標籤 */
+                const stripped = improved
+                    .replace(/^\s*<div[^>]*>\s*/i, '')
+                    .replace(/\s*<\/div>\s*$/i, '')
+                    .trim();
+
+                let newBlocks = [];
                 try {
-                    const newBlocks = wp.blocks.rawHandler({ HTML: improved });
-                    insertBlocks(newBlocks, 0);
+                    newBlocks = wp.blocks.rawHandler({ HTML: stripped });
                 } catch (e) {
-                    /* rawHandler 失敗時退回 HTML block */
-                    const fallback = wp.blocks.createBlock('core/html', { content: improved });
-                    insertBlocks([fallback], 0);
+                    newBlocks = [];
                 }
+
+                /* 若 rawHandler 仍只回傳單一 html block，改為手動拆解標籤 */
+                if (
+                    newBlocks.length === 0 ||
+                    (newBlocks.length === 1 && newBlocks[0].name === 'core/html')
+                ) {
+                    newBlocks = manualHtmlToBlocks(stripped);
+                }
+
+                insertBlocks(newBlocks, 0);
             } else {
-                /* Classic Editor：在頂部加一行分隔 + 新內容 */
+                /* Classic Editor：頂部插入 + 分隔線 + 原文 */
                 const existing = getEditedPostContent() || '';
                 editPost({ content: improved + '\n\n<hr/>\n\n' + existing });
             }
             setStatus('done');
             setMessage('已插入文章頂部，請確認後儲存。');
             setImproved(null);
+        }
+
+        /* 手動把 HTML 拆成 paragraph / heading blocks */
+        function manualHtmlToBlocks(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            const blocks = [];
+            div.childNodes.forEach((node) => {
+                if (node.nodeType !== 1) return; // 只處理元素節點
+                const tag = node.tagName.toLowerCase();
+                const inner = node.innerHTML;
+                if (/^h[1-6]$/.test(tag)) {
+                    blocks.push(wp.blocks.createBlock('core/heading', {
+                        level:   parseInt(tag[1], 10),
+                        content: inner,
+                    }));
+                } else if (tag === 'ul' || tag === 'ol') {
+                    blocks.push(wp.blocks.createBlock('core/list', {
+                        ordered: tag === 'ol',
+                        values:  inner,
+                    }));
+                } else {
+                    /* p, div, blockquote, 其他 → 段落 */
+                    blocks.push(wp.blocks.createBlock('core/paragraph', {
+                        content: inner || node.textContent,
+                    }));
+                }
+            });
+            return blocks.length ? blocks : [
+                wp.blocks.createBlock('core/html', { content: html }),
+            ];
         }
 
         return el(Fragment, null,

@@ -3,7 +3,7 @@
  * Plugin Name: Wrova
  * Plugin URI:  https://github.com/skiseiju/wrova
  * Description: AI 驅動的 WordPress SEO + AEO 文章生成外掛
- * Version:     1.0.3
+ * Version:     1.0.4
  * Author:      skiseiju
  * Author URI:  https://skiseiju.com
  * License:     GPL-2.0+
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'WROVA_VERSION', '1.0.3' );
+define( 'WROVA_VERSION', '1.0.4' );
 define( 'WROVA_PLUGIN_FILE', __FILE__ );
 define( 'WROVA_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WROVA_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
