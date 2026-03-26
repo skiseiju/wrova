@@ -132,7 +132,7 @@ class Wrova_REST_Controller {
         ] ) );
     }
 
-    // Module B：文章優化（支援 sidebar 直接傳 content）
+    // Module B：文章潤稿（支援 sidebar 直接傳 content）
     public function handle_improve( WP_REST_Request $request ): WP_REST_Response|WP_Error {
         $post_id       = intval( $request->get_param( 'post_id' ) );
         $direct_content = sanitize_textarea_field( $request->get_param( 'content' ) ?? '' );
@@ -145,14 +145,14 @@ class Wrova_REST_Controller {
         $source_content = $direct_content ?: ( $post ? $post->post_content : '' );
 
         if ( empty( trim( wp_strip_all_tags( $source_content ) ) ) ) {
-            return new WP_Error( 'empty_content', '文章內容為空，無法優化', [ 'status' => 400 ] );
+            return new WP_Error( 'empty_content', '文章內容為空，無法潤稿', [ 'status' => 400 ] );
         }
 
         // 取得文章內附圖（有 post 才抓）
         $image_ids = $post ? $this->get_post_image_ids( $post ) : [];
 
         // 組合 improve prompt
-        $prompt = "請優化以下繁體中文文章，讓它更符合 SEO 與 AEO 要求：\n\n" .
+        $prompt = "請潤稿以下繁體中文文章，讓它更符合 SEO 與 AEO 要求：\n\n" .
                   ( $post_title ? "標題：{$post_title}\n\n" : '' ) .
                   "內容：\n" . wp_strip_all_tags( $source_content ) . "\n\n" .
                   "要求：\n" .
@@ -164,7 +164,7 @@ class Wrova_REST_Controller {
                   "請嚴格只以 JSON 格式回傳，不要加說明或 markdown：\n" .
                   '{"title":"","content":"完整HTML文章","excerpt":"","faq":[{"question":"","answer":""}],"seo_title":"","seo_description":"","focus_keyword":""}';
 
-        $system_prompt = '你是專業的繁體中文 SEO 文章編輯，擅長在保留原文精神的前提下優化文章結構與搜尋能見度。請嚴格只回傳 JSON，不含任何說明文字。';
+        $system_prompt = '你是專業的繁體中文 SEO 文章編輯，擅長在保留原文精神的前提下潤稿文章結構與搜尋能見度。請嚴格只回傳 JSON，不含任何說明文字。';
 
         // 準備圖片
         $images = [];

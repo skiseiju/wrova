@@ -25,7 +25,7 @@ class Wrova_Admin {
         );
 
         add_submenu_page( 'wrova', '全新產文', '全新產文', 'edit_posts', 'wrova', [ $this, 'page_module_a' ] );
-        add_submenu_page( 'wrova', '文章優化', '文章優化', 'edit_posts', 'wrova-improve', [ $this, 'page_module_b' ] );
+        add_submenu_page( 'wrova', '文章潤稿', '文章潤稿', 'edit_posts', 'wrova-improve', [ $this, 'page_module_b' ] );
         add_submenu_page( 'wrova', 'Prompt 管理', 'Prompt 管理', 'manage_options', 'wrova-prompts', [ $this, 'page_prompts' ] );
         add_submenu_page( 'wrova', '設定', '設定', 'manage_options', 'wrova-settings', [ $this, 'page_settings' ] );
     }

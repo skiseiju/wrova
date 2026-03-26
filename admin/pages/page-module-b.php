@@ -1,6 +1,6 @@
 <?php if ( ! defined( 'ABSPATH' ) ) exit; ?>
 <div class="wrap wrova-page">
-    <h1>Wrova — 文章優化</h1>
+    <h1>Wrova — 文章潤稿</h1>
     <p class="description">選取現有文章，由 AI 重寫後並排比對，逐段確認後更新。</p>
 
     <div id="wrova-module-b">
@@ -40,7 +40,7 @@
                         </div>
                     </div>
                     <button type="button" id="wrova-start-btn" class="button button-primary button-hero wrova-start-btn">
-                        <span class="dashicons dashicons-controls-play"></span> 開始優化
+                        <span class="dashicons dashicons-controls-play"></span> 開始潤稿
                     </button>
                 </div>
             </div>
@@ -727,7 +727,7 @@
         })
         .catch(function(err) {
             stopLoadingAnimation();
-            showNotice('優化失敗：' + err.message, true);
+            showNotice('潤稿失敗：' + err.message, true);
             showStep(1);
         });
     }
@@ -807,7 +807,7 @@
 
     /* ---- 取消 ---- */
     $('#wrova-cancel-btn').on('click', function() {
-        if (!confirm('確定要取消嗎？所有優化結果將不會儲存。')) return;
+        if (!confirm('確定要取消嗎？所有潤稿結果將不會儲存。')) return;
         improveResult = null;
         selectedPostId = null;
         selectedPostData = null;

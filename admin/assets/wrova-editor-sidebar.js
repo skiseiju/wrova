@@ -1,6 +1,6 @@
 /**
  * Wrova Editor Sidebar
- * Block Editor 右側 AI 產文 / 優化面板
+ * Block Editor 右側 AI 產文 / 潤稿面板
  */
 (function () {
     'use strict';
@@ -300,7 +300,7 @@
     }
 
     /* ============================================================
-       Tab：優化
+       Tab：潤稿
     ============================================================ */
     function TabImprove({ postId }) {
         const [status,   setStatus]   = useState('idle');
@@ -337,7 +337,7 @@
                 setMessage(
                     (err && err.message)
                         ? err.message
-                        : '優化失敗，請確認設定頁的 API Key。'
+                        : '潤稿失敗，請確認設定頁的 API Key。'
                 );
             }
         }
@@ -345,14 +345,14 @@
         function applyImproved() {
             editPost({ content: improved });
             setStatus('done');
-            setMessage('已套用優化版本，請確認後儲存。');
+            setMessage('已套用潤稿版本，請確認後儲存。');
             setImproved(null);
         }
 
         return el(Fragment, null,
             el(PanelBody, { title: '說明', initialOpen: true },
                 el('p', { style: { fontSize: '12px', color: '#757575', margin: 0 } },
-                    'AI 分析目前文章，強化 SEO 結構、加入 AEO 問答區塊、調整標題與段落節奏。優化結果可預覽後套用或放棄。'
+                    'AI 分析目前文章，強化 SEO 結構、加入 AEO 問答區塊、調整標題與段落節奏。潤稿結果可預覽後套用或放棄。'
                 ),
             ),
 
@@ -366,11 +366,11 @@
                 },
                     status === 'loading'
                         ? el(Fragment, null, el(Spinner), ' 分析中…')
-                        : 'AI 優化目前文章'
+                        : 'AI 潤稿目前文章'
                 ),
             ),
 
-            status === 'preview' && el(PanelBody, { title: '優化完成', initialOpen: true },
+            status === 'preview' && el(PanelBody, { title: '潤稿完成', initialOpen: true },
                 el('p', { style: { fontSize: '12px', color: '#888', margin: '0 0 10px' } },
                     '點「套用」後可在編輯器逐段確認差異。'
                 ),
@@ -438,7 +438,7 @@
                     },
                 },
                     tabBtn('generate', '✦ 產文'),
-                    tabBtn('improve',  '↻ 優化'),
+                    tabBtn('improve',  '↻ 潤稿'),
                 ),
 
                 activeTab === 'generate'
