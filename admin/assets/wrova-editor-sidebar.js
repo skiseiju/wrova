@@ -324,17 +324,21 @@
                 const data = await apiFetch({
                     path: 'wrova/v1/improve',
                     method: 'POST',
-                    data: { post_id: postId, content },
+                    data: { post_id: postId || 0, content },
                 });
-                if (data && (data.improved_content || data.paragraphs)) {
-                    setImproved(data.improved_content || data.content || '');
+                if (data && data.improved_content) {
+                    setImproved(data.improved_content);
                     setStatus('preview');
                 } else {
-                    throw new Error('AI 回傳格式異常');
+                    throw new Error('AI 未回傳有效內容，請再試一次');
                 }
             } catch (err) {
                 setStatus('error');
-                setMessage(err.message || '優化失敗，請確認 API Key 設定。');
+                setMessage(
+                    (err && err.message)
+                        ? err.message
+                        : '優化失敗，請確認設定頁的 API Key。'
+                );
             }
         }
 

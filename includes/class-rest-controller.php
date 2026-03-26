@@ -132,43 +132,46 @@ class Wrova_REST_Controller {
         ] ) );
     }
 
-    // Module B：文章優化
+    // Module B：文章優化（支援 sidebar 直接傳 content）
     public function handle_improve( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-        $post_id = intval( $request->get_param( 'post_id' ) );
+        $post_id       = intval( $request->get_param( 'post_id' ) );
+        $direct_content = sanitize_textarea_field( $request->get_param( 'content' ) ?? '' );
 
-        if ( ! $post_id ) {
-            return new WP_Error( 'missing_post_id', '請提供文章 ID', [ 'status' => 400 ] );
+        // 取得文章物件（允許 post_id=0 的新草稿）
+        $post       = $post_id ? get_post( $post_id ) : null;
+        $post_title = $post ? $post->post_title : '';
+
+        // 優先用 sidebar 傳來的即時內容；fallback 才用 DB
+        $source_content = $direct_content ?: ( $post ? $post->post_content : '' );
+
+        if ( empty( trim( wp_strip_all_tags( $source_content ) ) ) ) {
+            return new WP_Error( 'empty_content', '文章內容為空，無法優化', [ 'status' => 400 ] );
         }
 
-        $post = get_post( $post_id );
-        if ( ! $post ) {
-            return new WP_Error( 'post_not_found', '找不到指定文章', [ 'status' => 404 ] );
-        }
-
-        // 取得文章內附圖
-        $image_ids = $this->get_post_image_ids( $post );
+        // 取得文章內附圖（有 post 才抓）
+        $image_ids = $post ? $this->get_post_image_ids( $post ) : [];
 
         // 組合 improve prompt
         $prompt = "請優化以下繁體中文文章，讓它更符合 SEO 與 AEO 要求：\n\n" .
-                  "標題：" . $post->post_title . "\n\n" .
-                  "內容：\n" . wp_strip_all_tags( $post->post_content ) . "\n\n" .
+                  ( $post_title ? "標題：{$post_title}\n\n" : '' ) .
+                  "內容：\n" . wp_strip_all_tags( $source_content ) . "\n\n" .
                   "要求：\n" .
                   "- 標題改為問句格式\n" .
                   "- H2/H3 使用問句\n" .
                   "- 開頭加 Featured Snippet 摘要\n" .
                   "- 結尾加 5 個 FAQ\n" .
                   "- 保持繁體中文，字數相近或更豐富\n\n" .
-                  "請以 JSON 格式回傳：\n" .
-                  '{"title":"","content":"HTML","excerpt":"","faq":[{"question":"","answer":""}],"seo_title":"","seo_description":"","focus_keyword":""}';
+                  "請嚴格只以 JSON 格式回傳，不要加說明或 markdown：\n" .
+                  '{"title":"","content":"完整HTML文章","excerpt":"","faq":[{"question":"","answer":""}],"seo_title":"","seo_description":"","focus_keyword":""}';
 
-        $system_prompt = '你是專業的繁體中文 SEO 文章編輯，擅長在保留原文精神的前提下優化文章結構與搜尋能見度。';
+        $system_prompt = '你是專業的繁體中文 SEO 文章編輯，擅長在保留原文精神的前提下優化文章結構與搜尋能見度。請嚴格只回傳 JSON，不含任何說明文字。';
 
         // 準備圖片
         $images = [];
         foreach ( array_slice( $image_ids, 0, 3 ) as $id ) {
-            $data = $this->get_image_data_for_ai( $id );
-            if ( $data ) {
-                $images[] = $data;
+            $img_data = $this->get_image_data_for_ai( $id );
+            if ( $img_data ) {
+                $images[] = $img_data;
             }
         }
 
@@ -179,18 +182,24 @@ class Wrova_REST_Controller {
             return $result;
         }
 
+        $improved_html = $result['content'] ?? '';
+        if ( empty( $improved_html ) ) {
+            return new WP_Error( 'empty_result', 'AI 未回傳有效的文章內容，請再試一次', [ 'status' => 500 ] );
+        }
+
         // 切割段落供並排比對
-        $builder             = new Wrova_Content_Builder();
-        $diff                = $builder->build_diff( $post->post_content, $result['content'] ?? '' );
-        $image_alts          = [];
+        $builder    = new Wrova_Content_Builder();
+        $diff       = $builder->build_diff( $source_content, $improved_html );
+        $image_alts = [];
         foreach ( $image_ids as $id ) {
             $image_alts[ $id ] = $result['focus_keyword'] ?? get_the_title( $id );
         }
 
         return new WP_REST_Response( [
-            'original_title'      => $post->post_title,
+            'improved_content'    => $improved_html,
+            'original_title'      => $post_title,
             'paragraphs'          => $diff,
-            'title'               => $result['title'] ?? $post->post_title,
+            'title'               => $result['title'] ?? $post_title,
             'excerpt'             => $result['excerpt'] ?? '',
             'faq'                 => $result['faq'] ?? [],
             'seo_title'           => $result['seo_title'] ?? '',
