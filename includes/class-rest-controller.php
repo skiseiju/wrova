@@ -57,9 +57,10 @@ class Wrova_REST_Controller {
     // Module A：全新產文
     public function handle_generate( WP_REST_Request $request ): WP_REST_Response|WP_Error {
         $keywords        = array_map( 'sanitize_text_field', (array) ( $request->get_param( 'keywords' ) ?? [] ) );
-        $mood            = sanitize_text_field( $request->get_param( 'mood' ) ?? '' );
-        $image_ids       = array_map( 'intval', (array) ( $request->get_param( 'image_ids' ) ?? [] ) );
-        $prompt_template = sanitize_text_field( $request->get_param( 'prompt_template' ) ?? 'wedding' );
+        $mood             = sanitize_text_field( $request->get_param( 'mood' ) ?? '' );
+        $image_ids        = array_map( 'intval', (array) ( $request->get_param( 'image_ids' ) ?? [] ) );
+        $prompt_template  = sanitize_text_field( $request->get_param( 'prompt_template' ) ?? 'wedding' );
+        $existing_content = sanitize_textarea_field( $request->get_param( 'existing_content' ) ?? '' );
 
         if ( empty( $keywords ) ) {
             return new WP_Error( 'missing_keywords', '請提供至少一個關鍵字', [ 'status' => 400 ] );
@@ -87,6 +88,11 @@ class Wrova_REST_Controller {
 
         $prompt        = $manager->build( $prompt_template, $vars );
         $system_prompt = $tpl ? $tpl['system_prompt'] : '';
+
+        // 若有現有文案，附加到 prompt 末尾供 AI 參考
+        if ( ! empty( $existing_content ) ) {
+            $prompt .= "\n\n【參考現有文案】\n請在保留原文精神與攝影師風格語氣的前提下，結合以上關鍵字與情緒重新撰寫：\n\n" . mb_substr( $existing_content, 0, 800 );
+        }
 
         // 準備圖片資料給 AI
         $images = [];
