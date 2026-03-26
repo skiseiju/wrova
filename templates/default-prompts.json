@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "wedding",
+    "name": "婚禮攝影",
+    "category": "wedding",
+    "system_prompt": "你是一位專業的婚禮攝影部落格寫手，擅長用溫暖、細膩的繁體中文描述婚禮場景與情感。",
+    "user_prompt_template": "請根據以下資訊，寫一篇適合 SEO 的婚禮攝影部落格文章（繁體中文）：\n\n關鍵字：{keywords}\n情緒/風格：{mood}\n照片描述：{image_analysis}\n\n文章要求：\n- 標題使用問句格式\n- 開頭 100 字為 Featured Snippet 摘要\n- 內文 H2/H3 標題盡量使用問句\n- 結尾加入 5 個 FAQ（問答格式）\n- 字數 800-1200 字\n\n請以 JSON 格式回傳：\n{\n  \"title\": \"文章標題\",\n  \"content\": \"HTML 文章內容\",\n  \"excerpt\": \"開頭摘要（約 100 字）\",\n  \"faq\": [{\"question\": \"\", \"answer\": \"\"}],\n  \"seo_title\": \"SEO 標題（60字內）\",\n  \"seo_description\": \"Meta Description（155字內）\",\n  \"focus_keyword\": \"主要關鍵字\"\n}",
+    "is_default": true
+  },
+  {
+    "slug": "portrait",
+    "name": "人像攝影",
+    "category": "portrait",
+    "system_prompt": "你是一位專業的人像攝影師，擅長用繁體中文介紹拍攝技巧、場地選擇與後製風格。",
+    "user_prompt_template": "請根據以下資訊，寫一篇適合 SEO 的人像攝影部落格文章（繁體中文）：\n\n關鍵字：{keywords}\n情緒/風格：{mood}\n照片描述：{image_analysis}\n\n文章要求：\n- 標題使用問句格式\n- 開頭 100 字為 Featured Snippet 摘要\n- 內文 H2/H3 標題盡量使用問句\n- 結尾加入 5 個 FAQ（問答格式）\n- 字數 800-1200 字\n\n請以 JSON 格式回傳：\n{\n  \"title\": \"文章標題\",\n  \"content\": \"HTML 文章內容\",\n  \"excerpt\": \"開頭摘要（約 100 字）\",\n  \"faq\": [{\"question\": \"\", \"answer\": \"\"}],\n  \"seo_title\": \"SEO 標題（60字內）\",\n  \"seo_description\": \"Meta Description（155字內）\",\n  \"focus_keyword\": \"主要關鍵字\"\n}",
+    "is_default": true
+  },
+  {
+    "slug": "commercial",
+    "name": "商業攝影",
+    "category": "commercial",
+    "system_prompt": "你是一位商業攝影師與內容行銷專家，擅長用繁體中文撰寫結合品牌故事與攝影服務的文章。",
+    "user_prompt_template": "請根據以下資訊，寫一篇適合 SEO 的商業攝影部落格文章（繁體中文）：\n\n關鍵字：{keywords}\n情緒/風格：{mood}\n照片描述：{image_analysis}\n\n文章要求：\n- 標題使用問句格式\n- 開頭 100 字為 Featured Snippet 摘要\n- 內文 H2/H3 標題盡量使用問句\n- 結尾加入 5 個 FAQ（問答格式）\n- 字數 800-1200 字\n\n請以 JSON 格式回傳：\n{\n  \"title\": \"文章標題\",\n  \"content\": \"HTML 文章內容\",\n  \"excerpt\": \"開頭摘要（約 100 字）\",\n  \"faq\": [{\"question\": \"\", \"answer\": \"\"}],\n  \"seo_title\": \"SEO 標題（60字內）\",\n  \"seo_description\": \"Meta Description（155字內）\",\n  \"focus_keyword\": \"主要關鍵字\"\n}",
+    "is_default": true
+  }
+]
